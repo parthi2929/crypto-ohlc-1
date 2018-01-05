@@ -80,9 +80,9 @@ function dummyOHLC(lastC ,key)
 {
     var OHLCTempArray = [];
     var open = utils.round(lastC,2); //new open is last close
-    var low = utils.round(utils.genRand(key*0.25, key*0.25, 2),2);
-    var close = utils.round(utils.genRand(key*0.25, key*0.25, 2) + low,2);
-    var high = utils.round(utils.genRand(key*0.25, key*0.25, 2) + Math.max(open, close),2);
+    var low = utils.round(utils.genRand(key*0.27, key*0.33, 2),2);
+    var close = utils.round(utils.genRand(key*0.21, key*0.36, 2) + low,2);
+    var high = utils.round(utils.genRand(key*0.3, key*0.42, 2) + Math.max(open, close),2);
     var vol = Math.floor(utils.genRand(63879193*0.25, 63879193*0.25, 2));
     OHLCTempArray.push((new Date).getTime());
     OHLCTempArray.push(open);  

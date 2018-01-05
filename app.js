@@ -14,12 +14,14 @@ app.get("/",routes.home);
 
 //5. Start OHLC
 var OHLC = require('./ohlc/ohlc_dummy.js');
-var OHLCCounter = 0;
+var OHLCCounter = 1;
+console.log("\nOHLC Count: " + OHLCCounter);
+OHLC.goOHLCDummy();
 function periodicOHLC() 
 {        
     OHLC.goOHLCDummy();
     ++OHLCCounter;
-    console.log("OHLC Count: " + OHLCCounter);
+    console.log("\nOHLC Count: " + OHLCCounter);
 } 
 
 //6. Listen
@@ -32,4 +34,4 @@ var server = app.listen(port,
 );
 
 //6. Repeat ohlc forever..
-setInterval(periodicOHLC, 60000);   //1 minute
+setInterval(periodicOHLC, 40000);   //1 minute
