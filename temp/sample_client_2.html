@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Ticker Client Example</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/drag-panes.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <style>        
+        .card
+        {
+            height:800px;
+        }
+        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+        .string { color: blue; }
+        .key { color: green; }
+        .NA { color: red; }
+        #chartsID
+        {
+            height:700px;
+        }    
+        </style>
+    </head>
+<body>
+        <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-6">
+                        <h4 class="text-center">Sample OHLC info</h4>
+                        <div class="card card-block bg-faded">
+                            <pre id="tickerListID"></pre>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-center">Highcharts</h4>
+                        <div class="card card-block bg-faded">
+                            <div id="chartsID"></div>                            
+                        </div>
+                    </div>
+                </div>
+        </div>        
+    
+    <script>
+    //$(document).ready(function()        
+    //{
+
+        start();
+        
+        function start()
+        {
+            $.ajax({
+            url: "http://crypto-ticker-1.herokuapp.com/ohlc",
+            dataType: "jsonp",
+            jsonpCallback: "logResults"
+            });
+            setTimeout(start, 20000);
+        }
+
+        function logResults(data)
+        {
+            console.log(data);
+
+            var pre = jQuery("#tickerListID");
+            pre.append('<br>' + JSON.stringify(data,null,2));
+            pre.scrollTop( pre.prop("scrollHeight"));
+
+            // split the data set into ohlc and volume
+            var ohlc = [],
+            volume = [],
+            dataLength = data.length,
+            // set the allowed units for data grouping
+            groupingUnits = [[
+                'week',                         // unit name
+                [1]                             // allowed multiples
+            ], [
+                'month',
+                [1, 2, 3, 4, 6]
+            ]],
+            i = 0;
+
+            for (i; i < dataLength; i += 1) 
+            {
+                ohlc.push([
+                    data[i][0], // the date
+                    data[i][1], // open
+                    data[i][2], // high
+                    data[i][3], // low
+                    data[i][4] // close
+                ]);
+
+                volume.push([
+                    data[i][0], // the date
+                    data[i][5] // the volume
+                ]);
+            }
+
+            // create the chart
+            Highcharts.stockChart('chartsID', 
+            {
+
+                rangeSelector: {
+                    selected: 1
+                },
+
+                title: {
+                    text: 'AAPL Historical'
+                },
+
+                yAxis: [{
+                    labels: {
+                        align: 'right',
+                        x: -3
+                    },
+                    title: {
+                        text: 'OHLC'
+                    },
+                    height: '60%',
+                    lineWidth: 2,
+                    resize: {
+                        enabled: true
+                    }
+                }, {
+                    labels: {
+                        align: 'right',
+                        x: -3
+                    },
+                    title: {
+                        text: 'Volume'
+                    },
+                    top: '65%',
+                    height: '35%',
+                    offset: 0,
+                    lineWidth: 2
+                }],
+                plotOptions:
+                {
+                    candlestick: 
+                    {
+                        color: 'red',
+                        upColor: 'green'
+                    }
+                },
+
+                tooltip: {
+                    split: true
+                },
+
+                series: [{
+                    type: 'candlestick',
+                    name: 'AAPL',
+                    data: ohlc,
+                    dataGrouping: {
+                        units: groupingUnits
+                    }
+                }, {
+                    type: 'column',
+                    name: 'Volume',
+                    data: volume,
+                    yAxis: 1,
+                    dataGrouping: {
+                        units: groupingUnits
+                    }
+                }]
+            });
+            
+        }        
+    
+    //});
+    </script>
+</body>
+</html>
