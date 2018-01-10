@@ -11,12 +11,55 @@ var C;
 var V;
 var atomicInterval;
 
-exports.goOHLCDummy = function()
+exports.goOHLCDummy = function(formatID)
 {
-    goOHLCDummy();
+    switch(formatID)
+    {
+        case 2:
+            goOHLCDummy2();
+            break;
+        case 3:
+            goOHLCDummy3();
+            break;
+        default:
+            goOHLCDummy2();
+            break;
+    }
+    
 }
 
-async function goOHLCDummy()
+async function goOHLCDummy3()
+{   
+    var initKey = 47;
+    if(OHLCArray3.length == 0)
+    {
+        key = initKey;
+    }
+    else
+    {
+        key = OHLCArray3[OHLCArray3.length-1].close;
+    } 
+
+    var OHLCArray1 = await getDummies(key, initKey);
+
+    //FORMAT 3: 
+    // OHLCArray3 = [  { 'x':235123, 'open':32.52, 'high':52, 'low':23, 'close':45 } , { 'x':215232, 'open':45, 'high':66, 'low':35, 'close':23 }, ...  ]  Multiple rows filled up with main interval data so DO NOT START EMPTY    
+    var result = 
+    {
+        'x':OHLCArray1[2][0],
+        'open':OHLCArray1[0][1],
+        'high':utils.max(OHLCArray1,2),
+        'low':utils.min(OHLCArray1,3),
+        'close':OHLCArray1[2][4],
+        'volume':utils.max(OHLCArray1,5)
+    }
+    OHLCArray3.push(result);
+    console.log("Array 3: " + OHLCArray3);
+
+    writeFile(3);
+}
+
+async function goOHLCDummy2()
 {
     var initKey = 47;
     if(OHLCArray3.length == 0)
@@ -26,16 +69,9 @@ async function goOHLCDummy()
     else
     {
         key = OHLCArray3[OHLCArray3.length-1][4];
-    }
+    }        
 
-    
-    // OHLCArray1 = [  [ time, O ,H , L ,C] , [ time, O , H , L, C], ...  ]  Multiple rows filled up with sub interval data. Starts empty in each main interval.
-    var OHLCArray1 = []; 
-    OHLCArray1.push(await dummyOHLC(key, initKey));                   //sub interval data
-    OHLCArray1.push(await dummyOHLC(OHLCArray1[0][4], initKey));      //sub interval data
-    OHLCArray1.push(await dummyOHLC(OHLCArray1[1][4], initKey));      //sub interval data 
-    console.log("Array 1: " + OHLCArray1);
-
+    var OHLCArray1 = await getDummies(key, initKey);
 
     // OHLCArray2 = [ time, O ,H , L ,C]  ONLY ONE ROW of consolidated OHLCArray1. Starts empty in each main interval.
     var OHLCArray2 = [];
@@ -47,31 +83,28 @@ async function goOHLCDummy()
     OHLCArray2.push(utils.max(OHLCArray1,5));
     console.log("Array 2: " + OHLCArray2);
 
-
+    //FORMAT 2: 
     // OHLCArray3 = [  [ time, O ,H , L ,C] , [ time, O , H , L, C], ...  ]  Multiple rows filled up with main interval data so DO NOT START EMPTY
     OHLCArray3.push(OHLCArray2);
     console.log("Array 3: " + OHLCArray3);
     //console.log("Array 3 length: " + OHLCArray3.length);
     //console.log("Array 3 lastC: " + OHLCArray3[OHLCArray3.length-1][4]);
 
-    //write data
-    fs.writeFile("./ohlc/ohlc_dummy_2.json", OHLCArray3, {spaces: 1}, (error) => 
-    {
-        if (error) 
-        {
-            console.error("\n " + utils.currentDateTime() + "Error writing OHLC JSON data file: " + error);
-            return;
-        };
-        console.log("\n " + utils.currentDateTime() + " OHLC JSON data File has been updated");
-    }); 
+    writeFile(2);
+    
+}
 
+async function getDummies(key, initKey)
+{
 
-    //Max size refresh for 4 years = 60*60*24*365*4 = 126144000 lines of OHLC if called per minute
-    //Note max array length allowed =  2^32-1 = 4294967295 which is higher for now.
-    if (OHLCArray3.length == 126144000)
-    {
-        OHLCArray3.length = 0;  //start from fresh
-    }
+    // OHLCArray1 = [  [ time, O ,H , L ,C] , [ time, O , H , L, C], ...  ]  Multiple rows filled up with sub interval data. Starts empty in each main interval.
+    var OHLCArray1 = []; 
+    OHLCArray1.push(await dummyOHLC(key, initKey));                   //sub interval data
+    OHLCArray1.push(await dummyOHLC(OHLCArray1[0][4], initKey));      //sub interval data
+    OHLCArray1.push(await dummyOHLC(OHLCArray1[1][4], initKey));      //sub interval data 
+    console.log("Array 1: " + OHLCArray1);
+
+    return OHLCArray1;
     
 }
 
@@ -92,7 +125,7 @@ function dummyOHLC(lastC ,key)
     OHLCTempArray.push(vol); 
     console.log("Dummy Array: " + OHLCTempArray);  
 
-    //wait for 5 seconds
+    //wait for 10 seconds
     return new Promise(
         (resolve, reject) =>
         {
@@ -104,4 +137,26 @@ function dummyOHLC(lastC ,key)
             );
         }
     );
+}
+
+function writeFile(formatID)
+{
+    //write data
+    fs.writeFile('./ohlc/ohlc_dummy_' + formatID + '.json', OHLCArray3, {spaces: 1}, (error) => 
+    {
+        if (error) 
+        {
+            console.error("\n " + utils.currentDateTime() + "Error writing OHLC JSON data file: " + error);
+            return;
+        };
+        console.log("\n " + utils.currentDateTime() + " OHLC JSON data File has been updated");
+    }); 
+
+
+    //Max size refresh for 4 years = 60*60*24*365*4 = 126144000 lines of OHLC if called per minute
+    //Note max array length allowed =  2^32-1 = 4294967295 which is higher for now.
+    if (OHLCArray3.length == 126144000)
+    {
+        OHLCArray3.length = 0;  //start from fresh
+    }
 }

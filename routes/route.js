@@ -8,7 +8,7 @@ exports.home = function(request, response)
 
 exports.ohlc = function (request, response)
 {    
-    fs.readFile('./ohlc/ohlc_dummy_2.json', function(error, jsonObject) 
+    fs.readFile('./ohlc/ohlc_dummy_3.json', function(error, jsonObject) 
     {
         if (error)
         {

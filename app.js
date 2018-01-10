@@ -16,10 +16,11 @@ app.get("/",routes.home);
 var OHLC = require('./ohlc/ohlc_dummy.js');
 var OHLCCounter = 1;
 console.log("\nOHLC Count: " + OHLCCounter);
-OHLC.goOHLCDummy();
+var formatID = 3;
+OHLC.goOHLCDummy(formatID);
 function periodicOHLC() 
 {        
-    OHLC.goOHLCDummy();
+    OHLC.goOHLCDummy(formatID);
     ++OHLCCounter;
     console.log("\nOHLC Count: " + OHLCCounter);
 } 
