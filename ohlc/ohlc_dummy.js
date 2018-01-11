@@ -1,5 +1,6 @@
 var fs = require("jsonfile");
 var utils = require('./ohlc_utils.js');
+var chalk = require('chalk');
 var isInitialized = false;
 var OHLCArray3 = [];
 var time;
@@ -11,6 +12,7 @@ var C;
 var V;
 var atomicInterval;
 
+
 exports.goOHLCDummy = function(formatID)
 {
     switch(formatID)
@@ -18,6 +20,9 @@ exports.goOHLCDummy = function(formatID)
         case 2:
             goOHLCDummy2();
             break;
+        case 21:
+            goOHLCDummy21();    //format as 2, but store in DB
+            break;            
         case 3:
             goOHLCDummy3();
             break;
@@ -27,6 +32,7 @@ exports.goOHLCDummy = function(formatID)
     }
     
 }
+
 
 async function goOHLCDummy3()
 {   
@@ -57,6 +63,53 @@ async function goOHLCDummy3()
     console.log("Array 3: " + OHLCArray3);
 
     writeFile(3);
+}
+
+var mongoose = require('mongoose');
+var ohlcModelRead = mongoose.model('ohlcModelRead');
+async function goOHLCDummy21()
+{
+    var initKey = 47;
+    var key;
+
+    ohlcModelRead.findOne({_id:1}, 
+        async function(error, result)
+        {
+            if(error) 
+            {
+                console.log(chalk.red('Error retrieving lastC from DB: ' + error));
+                key = initKey;
+            }
+            else 
+            {
+                console.log(chalk.blue('Raw result from DB: ' + result));
+                if (result != null)
+                {
+                    key = result.data[result.data.length-1][4];     
+                }
+                else
+                {
+                    key = initKey;
+                }                
+            }
+            console.log(chalk.yellow('LastC: ' + key));
+
+            var OHLCArray1 = await getDummies(key, initKey);
+
+            // OHLCArray2 = [ time, O ,H , L ,C]  ONLY ONE ROW of consolidated OHLCArray1. Starts empty in each main interval.
+            var OHLCArray2 = [];
+            OHLCArray2.push(OHLCArray1[2][0]);     //time is the latest in array
+            OHLCArray2.push(OHLCArray1[0][1]);     //open is the first in array collections
+            OHLCArray2.push(utils.max(OHLCArray1,2));     //high is the max of all 3rd element of each array(row)
+            OHLCArray2.push(utils.min(OHLCArray1,3));     //low is the min of all 4th element of each array(row)
+            OHLCArray2.push(OHLCArray1[2][4]);     //close is the close value of last array(row)
+            OHLCArray2.push(utils.max(OHLCArray1,5));
+            console.log("Array 2: " + OHLCArray2);
+        
+            appendDB(OHLCArray2);              
+        }
+    );
+  
 }
 
 async function goOHLCDummy2()
@@ -159,4 +212,36 @@ function writeFile(formatID)
     {
         OHLCArray3.length = 0;  //start from fresh
     }
+}
+
+
+var ohlcModelWrite = mongoose.model('ohlcModelWrite');
+function appendDB(OHLCArray2)
+{
+    //update the record with new data
+    ohlcModelWrite.findOneAndUpdate(
+        { _id:1},
+        { $push: { 'data': OHLCArray2 } },
+        { upsert: true },
+        function(error, result)
+        { 
+            if(error) console.log(chalk.red('Error appending: ' + error)); 
+            else console.log(chalk.green('Data Successfully appended in DB')); //VERY FIRST TIME RETURNS NULL THOUGH DATA APPENDED WHICH IS WRONG
+
+            //Max size refresh for 4 years = 60*60*24*365*4 = 126144000 lines of OHLC if called per minute
+            //Note max array length allowed =  2^32-1 = 4294967295 which is higher for now.
+            if (result != null)  
+            {
+                if (result.data != null)
+                {
+                    if (result.data.length == 126144000) //if those many rows
+                    {
+                        result.data.length = 0;   //clean up
+                    }
+                }
+            }            
+        }
+    );
+
+
 }

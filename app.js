@@ -1,7 +1,10 @@
 //1. Import
 var express = require('express');
 var path = require('path');
+
+var db = require('./db/db.js');  //caz route uses mongodb, this goes first
 var routes = require('./routes/route.js');
+
 
 //2. Initiate
 var app = express();
@@ -16,12 +19,15 @@ app.get("/",routes.home);
 var OHLC = require('./ohlc/ohlc_dummy.js');
 var OHLCCounter = 1;
 console.log("\nOHLC Count: " + OHLCCounter);
-var formatID = 3;
+var formatID = 21;
+//db.openDB();
 OHLC.goOHLCDummy(formatID);
 function periodicOHLC() 
 {        
+    //db.openDB();
     OHLC.goOHLCDummy(formatID);
     ++OHLCCounter;
+    //db.closeDB();   //if too frequent update, you may want to avoid this
     console.log("\nOHLC Count: " + OHLCCounter);
 } 
 

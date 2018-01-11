@@ -10,9 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.17.1",
+    "chalk": "^2.3.0",
     "cloudscraper": "^1.4.1",
     "express": "^4.16.2",
     "is-json": "^2.0.1",
-    "jsonfile": "^4.0.0"
+    "jsonfile": "^4.0.0",
+    "mongodb": "^3.0.1",
+    "mongoose": "^4.13.9"
   }
 }
