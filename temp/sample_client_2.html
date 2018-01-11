@@ -57,7 +57,7 @@
             dataType: "jsonp",
             jsonpCallback: "logResults"
             });
-            setTimeout(start, 20000);
+            setTimeout(start, 60000);
         }
 
         function logResults(data)
@@ -86,16 +86,16 @@
             for (i; i < dataLength; i += 1) 
             {
                 ohlc.push([
-                    data[i].x, // the date
-                    data[i].open, // open
-                    data[i].high, // high
-                    data[i].low, // low
-                    data[i].close // close
+                    data[i][0], // the date
+                    data[i][1], // open
+                    data[i][2], // high
+                    data[i][3], // low
+                    data[i][4] // close
                 ]);
 
                 volume.push([
-                    data[i].x, // the date
-                    data[i].volume // the volume
+                    data[i][0], // the date
+                    data[i][5] // the volume
                 ]);
             }
 
