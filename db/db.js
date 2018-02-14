@@ -1,5 +1,6 @@
 var  mongoose = require('mongoose');
 var chalk = require("chalk");
+var config = require('./db_config.js');
 //mongoose.Promise = global.Promise;
 var ohlcSchema = mongoose.Schema(
     {
@@ -7,7 +8,7 @@ var ohlcSchema = mongoose.Schema(
         data: [Number]
     },
     {
-        collection:'ohlc-min-DB'
+        collection: config.collection
     }
 );
 var ohlcSchemaRead = mongoose.Schema(
@@ -16,12 +17,12 @@ var ohlcSchemaRead = mongoose.Schema(
         data: [[Number]]
     },
     {
-        collection:'ohlc-min-DB'
+        collection:config.collection
     }
 );
 
 //var uri = 'mongodb://localhost:27017/test';
-var uri = 'mongodb://ohlcuser1:ohlcuser1@ds251747.mlab.com:51747/ohlc-dummy-1';
+var uri = config.uri;
 
 //models for write and read
 mongoose.model('ohlcModelWrite', ohlcSchema);

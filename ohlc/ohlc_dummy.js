@@ -5,12 +5,7 @@ var isInitialized = false;
 var OHLCArray3 = [];
 var time;
 var key;
-var O;
-var H;
-var L;
-var C;
-var V;
-var atomicInterval;
+
 
 
 exports.goOHLCDummy = function(formatID)
@@ -87,7 +82,7 @@ async function goOHLCDummy21()
                 {
                     key = result.data[result.data.length-1][4];     
                 }
-                else
+                else    //array is empty
                 {
                     key = initKey;
                 }                

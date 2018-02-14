@@ -1,41 +1,4 @@
-Mongodb Simple Array Example:
+https://gist.github.com/lineus/17435b52306be16b207df8739d446b2e
 
+http://mongoosejs.com/docs/api.html#aggregate_aggregate
 
-> myC.insert( { _id:1, data:[{ x:0,y:0 }] } );
-WriteResult({ "nInserted" : 1 })
-> myC.find();
-
-{ "_id" : 1, "data" : [ { "x" : 0, "y" : 0 } ] }
-
-
-> myC.update(
-... { _id: 1 },
-... { $addToSet: { data: { $each: [ { x:2,y:3} ] }}});
-WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
-> myC.find();
-
-{ "_id" : 1, "data" : [ { "x" : 0, "y" : 0 }, { "x" : 2, "y" : 3 } ] }
-
-
-> myC.update( { _id: 1 }, { $addToSet: { data: { $each: [ { x:5,y:2} ] }}});
-WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
-> myC.find();
-{ "_id" : 1, "data" : [ { "x" : 0, "y" : 0 }, { "x" : 2, "y" : 3 }, { "x" : 5, "y" : 2 } ] }
-
-
-how to use such a chart in highcharts (hardcoded in client for now, later should pull via json)
-Highcharts.chart('container', {
-    chart: {
-        type: 'line'
-    },
-
-    series: [{
-        data: [{
-            "x": 1,
-            "y": 3
-        }, {
-            "x": 2,
-            "y": 5
-        }]
-    }]
-});

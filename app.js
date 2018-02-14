@@ -11,25 +11,34 @@ var app = express();
 
 //3. Configure
 app.get("/ohlc",routes.ohlc);
+app.get("/ohlc5",routes.ohlc5); //5 min interval 
 app.get("/",routes.home);
 
 
 
 //5. Start OHLC
-var OHLC = require('./ohlc/ohlc_dummy.js');
-var OHLCCounter = 1;
-console.log("\nOHLC Count: " + OHLCCounter);
-var formatID = 21;
-//db.openDB();
-OHLC.goOHLCDummy(formatID);
-function periodicOHLC() 
-{        
-    //db.openDB();
-    OHLC.goOHLCDummy(formatID);
-    ++OHLCCounter;
-    //db.closeDB();   //if too frequent update, you may want to avoid this
-    console.log("\nOHLC Count: " + OHLCCounter);
-} 
+// var OHLC = require('./ohlc/ohlc_dummy.js');
+// var OHLCCounter = 1;
+// console.log("\nOHLC Count: " + OHLCCounter);
+// var formatID = 21;
+// //db.openDB();
+// OHLC.goOHLCDummy(formatID);
+// function periodicOHLC() 
+// {        
+//     //db.openDB();
+//     OHLC.goOHLCDummy(formatID);
+//     ++OHLCCounter;
+//     //db.closeDB();   //if too frequent update, you may want to avoid this
+//     console.log("\nOHLC Count: " + OHLCCounter);
+// } 
+
+//5. Start OHLC Main
+var OHLCKoinex = require('./ohlc/ohlc_koinex.js');
+OHLCKoinex.go();
+function periodicOHLC()
+{
+    OHLCKoinex.go();
+}
 
 //6. Listen
 var port = process.env.PORT || 8080;
@@ -41,4 +50,4 @@ var server = app.listen(port,
 );
 
 //6. Repeat ohlc forever..
-setInterval(periodicOHLC, 40000);   //1 minute
+setInterval(periodicOHLC, 60000);   //1 minute
