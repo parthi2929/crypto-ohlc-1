@@ -34,10 +34,14 @@ app.get("/",routes.home);
 
 //5. Start OHLC Main
 var OHLCKoinex = require('./ohlc/ohlc_koinex.js');
+var OHLCCounter = 1;
 OHLCKoinex.go();
+console.log("\nOHLC Count: " + OHLCCounter);
 function periodicOHLC()
 {
     OHLCKoinex.go();
+    ++OHLCCounter;
+    console.log("\nOHLC Count: " + OHLCCounter);
 }
 
 //6. Listen
